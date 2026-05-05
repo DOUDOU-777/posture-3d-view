@@ -21,11 +21,25 @@
       padding: 8px 12px;
       border-radius: 10px;
     }
+
+    #label {
+      position: fixed;
+      left: 20px;
+      bottom: 24px;
+      z-index: 10;
+      color: #29413E;
+      font-size: 16px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: bold;
+    }
   </style>
 </head>
 
 <body>
 <div id="tip">正在启动3D程序...</div>
+<div id="label">姿态状态：加载中</div>
 
 <script src="./libs/three.min.js"></script>
 <script src="./libs/OrbitControls.js"></script>
@@ -33,6 +47,7 @@
 
 <script>
   const tip = document.getElementById('tip');
+  const label = document.getElementById('label');
 
   if (typeof THREE === 'undefined') {
     tip.innerText = 'Three.js加载失败，请检查 three.min.js';
@@ -70,11 +85,54 @@
     const msg = params.get('msg') || 'normal';
 
     let targetColor = 0x72B09F;
+    let markerColor = 0x72B09F;
+    let statusText = '正常姿态';
+    let markerPosition = null;
 
     if (msg === 'hunchback') {
       targetColor = 0xE5533D;
+      markerColor = 0xFF2D2D;
+      statusText = '驼背异常：背部高亮提示';
+      markerPosition = new THREE.Vector3(0, 1.25, 0.35);
     } else if (msg === 'neck_stain') {
       targetColor = 0xD99025;
+      markerColor = 0xFF9900;
+      statusText = '颈部异常：颈部高亮提示';
+      markerPosition = new THREE.Vector3(0, 1.95, 0.25);
+    } else {
+      targetColor = 0x72B09F;
+      statusText = '正常姿态：未检测到异常部位';
+    }
+
+    label.innerText = '姿态状态：' + statusText;
+
+    let marker = null;
+    let markerHalo = null;
+
+    function createMarker(position, color) {
+      const markerGeometry = new THREE.SphereGeometry(0.12, 32, 32);
+      const markerMaterial = new THREE.MeshBasicMaterial({
+        color: color
+      });
+
+      marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.copy(position);
+      scene.add(marker);
+
+      const haloGeometry = new THREE.SphereGeometry(0.22, 32, 32);
+      const haloMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.25
+      });
+
+      markerHalo = new THREE.Mesh(haloGeometry, haloMaterial);
+      markerHalo.position.copy(position);
+      scene.add(markerHalo);
+
+      const pointLight = new THREE.PointLight(color, 1.8, 2);
+      pointLight.position.copy(position);
+      scene.add(pointLight);
     }
 
     const loader = new THREE.GLTFLoader();
@@ -103,6 +161,11 @@
         });
 
         scene.add(model);
+
+        if (markerPosition) {
+          createMarker(markerPosition, markerColor);
+        }
+
         tip.innerText = '模型加载完成，可拖动旋转';
       },
 
@@ -127,8 +190,22 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    let pulse = 0;
+
     function animate() {
       requestAnimationFrame(animate);
+
+      pulse += 0.04;
+
+      if (marker && markerHalo) {
+        const scale = 1 + Math.sin(pulse) * 0.18;
+        marker.scale.set(scale, scale, scale);
+
+        const haloScale = 1.2 + Math.sin(pulse) * 0.35;
+        markerHalo.scale.set(haloScale, haloScale, haloScale);
+        markerHalo.material.opacity = 0.18 + Math.abs(Math.sin(pulse)) * 0.18;
+      }
+
       controls.update();
       renderer.render(scene, camera);
     }
