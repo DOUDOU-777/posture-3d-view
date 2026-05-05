@@ -20,43 +20,24 @@
       background: rgba(255,255,255,0.9);
       padding: 8px 12px;
       border-radius: 10px;
-      max-width: 90%;
-      word-break: break-all;
     }
   </style>
 </head>
 
 <body>
-<div id="tip">页面已打开，准备启动3D程序...</div>
+<div id="tip">正在启动3D程序...</div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "./libs/three.module.js"
-  }
-}
-</script>
+<script src="./libs/three.min.js"></script>
+<script src="./libs/OrbitControls.js"></script>
+<script src="./libs/GLTFLoader.js"></script>
 
-<script type="module">
+<script>
   const tip = document.getElementById('tip');
 
-  try {
-    tip.innerText = '正在加载 three.module.js...';
-
-    const THREE = await import('./libs/three.module.js');
-
-    tip.innerText = '正在加载 OrbitControls.js...';
-
-    const controlsModule = await import('./libs/OrbitControls.js');
-
-    tip.innerText = '正在加载 GLTFLoader.js...';
-
-    const loaderModule = await import('./libs/GLTFLoader.js');
-
-    const OrbitControls = controlsModule.OrbitControls;
-    const GLTFLoader = loaderModule.GLTFLoader;
-
-    tip.innerText = 'Three.js加载成功，正在创建场景...';
+  if (typeof THREE === 'undefined') {
+    tip.innerText = 'Three.js加载失败，请检查 three.min.js';
+  } else {
+    tip.innerText = 'Three.js已加载，正在加载模型...';
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf8f7e4);
@@ -81,7 +62,7 @@
     dirLight.position.set(3, 5, 5);
     scene.add(dirLight);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.target.set(0, 1, 0);
 
@@ -96,9 +77,7 @@
       targetColor = 0xD99025;
     }
 
-    tip.innerText = '正在加载 XBot.glb...';
-
-    const loader = new GLTFLoader();
+    const loader = new THREE.GLTFLoader();
 
     loader.load(
       './XBot.glb',
@@ -113,7 +92,7 @@
         model.position.sub(center);
         model.position.y -= 1;
 
-        model.traverse((child) => {
+        model.traverse(function (child) {
           if (child.isMesh) {
             child.material = new THREE.MeshStandardMaterial({
               color: targetColor,
@@ -138,11 +117,11 @@
 
       function (error) {
         console.error(error);
-        tip.innerText = '模型加载失败：' + error.message;
+        tip.innerText = '模型加载失败，请检查 XBot.glb';
       }
     );
 
-    window.addEventListener('resize', () => {
+    window.addEventListener('resize', function () {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -155,10 +134,6 @@
     }
 
     animate();
-
-  } catch (err) {
-    console.error(err);
-    tip.innerText = '程序加载失败：' + err.message;
   }
 </script>
 
