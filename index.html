@@ -17,7 +17,7 @@
       z-index: 10;
       color: #29413E;
       font-size: 16px;
-      background: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.85);
       padding: 8px 12px;
       border-radius: 10px;
     }
@@ -25,6 +25,7 @@
 </head>
 
 <body>
+
 <div id="tip">正在加载3D模型...</div>
 
 <script type="module">
@@ -34,22 +35,26 @@
 
   const tip = document.getElementById('tip');
 
+  // ===== 场景 =====
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf8f7e4);
 
+  // ===== 相机 =====
   const camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
-  camera.position.set(0, 1.4, 4);
+  camera.position.set(0, 1.5, 4);
 
+  // ===== 渲染器 =====
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
 
+  // ===== 光源 =====
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
   scene.add(ambientLight);
 
@@ -57,59 +62,80 @@
   dirLight.position.set(3, 5, 5);
   scene.add(dirLight);
 
+  // ===== 控制器 =====
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.target.set(0, 1, 0);
 
+  // ===== 姿态参数 =====
   const params = new URLSearchParams(window.location.search);
   const msg = params.get('msg') || 'normal';
 
-  let targetColor = 0x72B09F;
+  let targetColor = 0x72B09F; // 默认绿
+
   if (msg === 'hunchback') {
-    targetColor = 0xE5533D;
+    targetColor = 0xE5533D; // 红
   } else if (msg === 'neck_stain') {
-    targetColor = 0xD99025;
+    targetColor = 0xD99025; // 橙
   }
 
+  // ===== 加载模型 =====
   const loader = new GLTFLoader();
 
   loader.load(
     './XBot.glb',
+
     function (gltf) {
       const model = gltf.scene;
 
-      model.position.set(0, -1, 0);
-      model.scale.set(1.4, 1.4, 1.4);
+      // ===== 自动居中 =====
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      model.position.sub(center);
 
+      // ===== 放大模型（关键）=====
+      model.scale.set(3, 3, 3);
+
+      // ===== 下移一点（让脚踩地）=====
+      model.position.y -= 1;
+
+      // ===== 改颜色 =====
       model.traverse((child) => {
         if (child.isMesh) {
           child.material = new THREE.MeshStandardMaterial({
             color: targetColor,
-            roughness: 0.55,
-            metalness: 0.05
+            roughness: 0.5,
+            metalness: 0.1
           });
         }
       });
 
       scene.add(model);
-      tip.innerText = '拖动屏幕可旋转模型';
+
+      tip.innerText = '加载完成，可拖动旋转';
     },
+
     function (xhr) {
-      const percent = Math.round((xhr.loaded / xhr.total) * 100);
-      tip.innerText = '模型加载中：' + percent + '%';
+      if (xhr.total) {
+        const percent = Math.round((xhr.loaded / xhr.total) * 100);
+        tip.innerText = '加载中：' + percent + '%';
+      }
     },
+
     function (error) {
       console.error(error);
-      tip.innerText = '模型加载失败，请检查 XBot.glb 路径';
+      tip.innerText = '模型加载失败';
     }
   );
 
+  // ===== 自适应 =====
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
+  // ===== 动画 =====
   function animate() {
     requestAnimationFrame(animate);
     controls.update();
