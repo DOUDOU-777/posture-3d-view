@@ -29,16 +29,6 @@
 <body>
 <div id="tip">页面已打开，准备启动3D程序...</div>
 
-<script>
-  window.addEventListener('error', function(e) {
-    document.getElementById('tip').innerText = '全局错误：' + e.message;
-  });
-
-  window.addEventListener('unhandledrejection', function(e) {
-    document.getElementById('tip').innerText = '模块加载失败：' + e.reason;
-  });
-</script>
-
 <script type="importmap">
 {
   "imports": {
@@ -53,15 +43,15 @@
   try {
     tip.innerText = '正在加载 three.module.js...';
 
-    const THREE = await import('./libs/three.module.js?v=9001');
+    const THREE = await import('./libs/three.module.js');
 
     tip.innerText = '正在加载 OrbitControls.js...';
 
-    const controlsModule = await import('./libs/OrbitControls.js?v=9001');
+    const controlsModule = await import('./libs/OrbitControls.js');
 
     tip.innerText = '正在加载 GLTFLoader.js...';
 
-    const loaderModule = await import('./libs/GLTFLoader.js?v=9001');
+    const loaderModule = await import('./libs/GLTFLoader.js');
 
     const OrbitControls = controlsModule.OrbitControls;
     const GLTFLoader = loaderModule.GLTFLoader;
@@ -111,7 +101,7 @@
     const loader = new GLTFLoader();
 
     loader.load(
-      './XBot.glb?v=9001',
+      './XBot.glb',
 
       function (gltf) {
         const model = gltf.scene;
@@ -147,6 +137,7 @@
       },
 
       function (error) {
+        console.error(error);
         tip.innerText = '模型加载失败：' + error.message;
       }
     );
@@ -166,6 +157,7 @@
     animate();
 
   } catch (err) {
+    console.error(err);
     tip.innerText = '程序加载失败：' + err.message;
   }
 </script>
