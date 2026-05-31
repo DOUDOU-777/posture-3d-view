@@ -84,24 +84,19 @@
     const params = new URLSearchParams(window.location.search);
     const msg = params.get('msg') || 'normal';
 
-    let targetColor = 0x72B09F;
-    let markerColor = 0x72B09F;
-    let statusText = '正常姿态';
+    const bodyColor = 0x72B09F; // 人体固定薄荷绿
+    let markerColor = null;
     let markerPosition = null;
+    let statusText = '正常姿态：未检测到异常部位';
 
     if (msg === 'hunchback') {
-      targetColor = 0xE5533D;
       markerColor = 0xFF2D2D;
-      statusText = '驼背异常：背部高亮提示';
       markerPosition = new THREE.Vector3(0, 1.25, 0.35);
+      statusText = '驼背异常：背部高亮提示';
     } else if (msg === 'neck_stain') {
-      targetColor = 0xD99025;
       markerColor = 0xFF9900;
-      statusText = '颈部异常：颈部高亮提示';
       markerPosition = new THREE.Vector3(0, 1.95, 0.25);
-    } else {
-      targetColor = 0x72B09F;
-      statusText = '正常姿态：未检测到异常部位';
+      statusText = '颈部异常：颈部高亮提示';
     }
 
     label.innerText = '姿态状态：' + statusText;
@@ -119,7 +114,7 @@
       marker.position.copy(position);
       scene.add(marker);
 
-      const haloGeometry = new THREE.SphereGeometry(0.22, 32, 32);
+      const haloGeometry = new THREE.SphereGeometry(0.24, 32, 32);
       const haloMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
@@ -130,7 +125,7 @@
       markerHalo.position.copy(position);
       scene.add(markerHalo);
 
-      const pointLight = new THREE.PointLight(color, 1.8, 2);
+      const pointLight = new THREE.PointLight(color, 2, 2.5);
       pointLight.position.copy(position);
       scene.add(pointLight);
     }
@@ -153,7 +148,7 @@
         model.traverse(function (child) {
           if (child.isMesh) {
             child.material = new THREE.MeshStandardMaterial({
-              color: targetColor,
+              color: bodyColor,
               roughness: 0.5,
               metalness: 0.1
             });
@@ -162,7 +157,7 @@
 
         scene.add(model);
 
-        if (markerPosition) {
+        if (markerPosition && markerColor) {
           createMarker(markerPosition, markerColor);
         }
 
