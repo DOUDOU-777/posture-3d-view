@@ -58,16 +58,35 @@ let markerColor = null;
 let markerType = '';
 let statusText = '正常姿态：未检测到异常部位';
 
-if (msg === 'hunchback') {
-  markerColor = 0xff2d2d;
-  markerType = 'back';
-  statusText = '驼背异常：背部高亮提示';
-} else if (msg === 'neck_stain') {
-  markerColor = 0xff9900;
-  markerType = 'neck';
-  statusText = '颈部异常：颈部高亮提示';
-}
+if (msg === 'head_forward') {
 
+  markerColor = 0xff9900
+
+  markerType = 'neck'
+
+  statusText = '头前倾：颈部异常'
+}else if (msg === 'hunchback') {
+
+  markerColor = 0xff2d2d
+
+  markerType = 'back'
+
+  statusText = '驼背：胸背部异常'
+}else if (msg === 'uneven_shoulders') {
+
+  markerColor = 0xff2d2d
+
+  markerType = 'shoulder'
+
+  statusText = '高低肩：肩部异常'
+}else if (msg === 'lateral_bias') {
+
+  markerColor = 0xff2d2d
+
+  markerType = 'spine'
+
+  statusText = '侧偏趋势：脊柱左右不对称'
+}
 label.innerText = '姿态状态：' + statusText;
 
 let marker = null;
@@ -140,7 +159,24 @@ loader.load(
           size.y * 0.10,
           size.z * 0.34
         );
-      }
+     }
+        if (markerType === 'shoulder') {
+
+  markerPos = new THREE.Vector3(
+    0.35,
+    size.y * 0.18,
+    size.z * 0.20
+  )
+}
+      if (markerType === 'spine') {
+
+  markerPos = new THREE.Vector3(
+    0.18,
+    size.y * 0.02,
+    size.z * 0.26
+  )
+}
+      
 
       createMarker(model, markerPos, markerColor);
     }
