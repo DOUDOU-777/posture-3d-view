@@ -92,13 +92,13 @@ let halos = [];
 
 // 创建单个异常点
 function createSingleMarker(parent, position, color) {
-  const markerGeo = new THREE.SphereGeometry(0.13, 36, 36);
+  const markerGeo = new THREE.SphereGeometry(0.5, 36, 36);
   const markerMat = new THREE.MeshBasicMaterial({ color: color });
   const marker = new THREE.Mesh(markerGeo, markerMat);
   marker.position.copy(position);
   parent.add(marker);
 
-  const haloGeo = new THREE.SphereGeometry(0.24, 36, 36);
+  const haloGeo = new THREE.SphereGeometry(0.5, 36, 36);
   const haloMat = new THREE.MeshBasicMaterial({
     color: color,
     transparent: true,
@@ -136,7 +136,7 @@ function getMarkerConfig(msg) {
       color: 0xff9900,
       text: '姿态状态：头前倾\n异常部位：颈部',
       points: [
-        { x: 0.00, y: 5, z:3 }
+        { x: 0.00, y: 50, z:3 }
       ]
     };
   }
@@ -146,7 +146,7 @@ function getMarkerConfig(msg) {
       color: 0xff2d2d,
       text: '姿态状态：驼背 / 胸椎后凸\n异常部位：胸背部',
       points: [
-        { x: 0.00, y: 4, z: 4}
+        { x: 0.00, y: 40, z: 4}
       ]
     };
   }
@@ -156,8 +156,8 @@ function getMarkerConfig(msg) {
       color: 0xff2d2d,
       text: '姿态状态：高低肩\n异常部位：左右肩部',
       points: [
-        { x: -4, y: 4.5, z: 3},
-        { x:  4, y:4.5, z: 3 }
+        { x: -4, y: 45, z: 3},
+        { x:  4, y:45, z: 3 }
       ]
     };
   }
@@ -167,8 +167,8 @@ function getMarkerConfig(msg) {
       color: 0xff2d2d,
       text: '姿态状态：左右不对称 / 侧偏趋势\n异常部位：躯干左右不对称点',
       points: [
-        { x: -2, y: 3, z: 2 },
-        { x: 2, y: 3, z: 2}
+        { x: -2, y: 30, z: 2 },
+        { x: 2, y: 30, z: 2}
       ]
     };
   }
